@@ -75,6 +75,11 @@ const imageKeywords = {
         // Fallback: Use the very first word of the category (most accurate for general cases)
         return food.category?.split('/')[0].split(' ')[0].toLowerCase() || "food";
     }
+
+	function startOver() {
+        // This clears the Svelte state and redirects to your home/quiz page
+        window.location.href = '/'; 
+    }
 </script>
 
 <svelte:head>
@@ -128,7 +133,9 @@ const imageKeywords = {
 						<button class="secondary" onclick={nextDeal}>
 							Explore other options
 						</button>
-
+						<button class="start-over" onclick={startOver}>
+        					Start Over
+    					</button>
 						<button class="dismiss" onclick={dismiss}>
 							Dismiss
 						</button>
@@ -494,4 +501,23 @@ const imageKeywords = {
 			opacity: 0.65;
 		}
 	}
+	.start-over {
+        border: 2px solid white;
+        background: transparent;
+        color: white;
+        border-radius: 999px;
+        padding: 22px 28px;
+        font-family: 'Inter', sans-serif;
+        font-size: 1.05rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease;
+        margin-top: 8px;
+    }
+
+    .start-over:hover {
+        background: white;
+        color: #ff0000;
+        transform: translateY(-2px);
+    }
 </style>
