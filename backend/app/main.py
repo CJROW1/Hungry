@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from typing import TypedDict
 from pydantic import BaseModel
-from apify_client import ApifyClient
 import os
 from .scraper import run_scraper_with_cookies
 
@@ -26,7 +25,7 @@ async def search_deals(q: str):
     # This calls the script you just pasted
     results = await run_scraper_with_cookies(q)
     return {"results": results}
-    
+
 class GreetingRequest(BaseModel):
     name: str
     age: int
