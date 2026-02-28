@@ -1,30 +1,86 @@
-<script>
+<script lang="ts">
 	import { goto } from '$app/navigation';
 
-	function startQuiz() {
-		goto('/qa');
+	let category = $state('');
+	let vibe = $state('');
+	let maxPrice = $state(25);
+	let minRating = $state(4);
+	let dietary = $state('None');
+
+	function submitPreferences() {
+		const params = new URLSearchParams({
+			category,
+			vibe,
+			maxPrice: String(maxPrice),
+			minRating: String(minRating),
+			dietary
+		});
+
+		goto(`/results?${params.toString()}`);
 	}
 </script>
 
 <div class="page">
 	<div class="card">
-		<div class="character-wrap">
-			<img
-				class="character"
-				src="/character.png"
-				alt="Food mascot character"
-			/>
-		</div>
+		<h1>Tell us your taste</h1>
+		<p class="subtitle">Answer a few quick questions so we can find your best match.</p>
 
-		<div class="text-content">
-			<p class="small">Hey foodie 🍟</p>
-			<h1>Let’s find your perfect food match.</h1>
-			<p class="description">
-				We’ll start with a short Q&amp;A to learn your taste in food.
-				Think of it like a dating app... but for your next meal.
-			</p>
+		<div class="form">
+			<label>
+				<span>Category</span>
+				<select bind:value={category}>
+					<option value="">Select a category</option>
+					<option value="Sushi">Sushi</option>
+					<option value="Burgers">Burgers</option>
+					<option value="Pizza">Pizza</option>
+					<option value="Korean">Korean</option>
+					<option value="Indian">Indian</option>
+					<option value="Healthy">Healthy</option>
+					<option value="Dessert">Dessert</option>
+				</select>
+			</label>
 
-			<button on:click={startQuiz}>Start Q&amp;A</button>
+			<label>
+				<span>Vibe</span>
+				<select bind:value={vibe}>
+					<option value="">Select a vibe</option>
+					<option value="Small and cozy">Small and cozy</option>
+					<option value="Big portions">Big portions</option>
+					<option value="Fancy">Fancy</option>
+					<option value="Comfort food">Comfort food</option>
+					<option value="Fast and simple">Fast and simple</option>
+				</select>
+			</label>
+
+			<label>
+				<span>Max Price ($)</span>
+				<input type="number" min="1" bind:value={maxPrice} />
+			</label>
+
+			<label>
+				<span>Minimum Rating</span>
+				<input type="number" min="0" max="5" step="0.1" bind:value={minRating} />
+			</label>
+
+			<label>
+				<span>Dietary</span>
+				<select bind:value={dietary}>
+					<option value="None">None</option>
+					<option value="Vegetarian">Vegetarian</option>
+					<option value="Vegan">Vegan</option>
+					<option value="Halal">Halal</option>
+					<option value="Gluten-free">Gluten-free</option>
+					<option value="Dairy-free">Dairy-free</option>
+				</select>
+			</label>
+
+			<button
+				class="submit"
+				onclick={submitPreferences}
+				disabled={!category || !vibe}
+			>
+				Show my matches
+			</button>
 		</div>
 	</div>
 </div>
@@ -42,84 +98,69 @@
 		align-items: center;
 		justify-content: center;
 		padding: 24px;
+		box-sizing: border-box;
 	}
 
 	.card {
-		width: min(1100px, 100%);
-		min-height: 80vh;
+		width: min(720px, 100%);
+		background: #ff1a1a;
 		border-radius: 32px;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 32px;
-		padding: 48px;
-		box-sizing: border-box;
-		overflow: hidden;
-	}
-
-	.character-wrap {
-		flex: 1;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-	}
-
-	.character {
-		width: min(380px, 100%);
-		height: auto;
-		object-fit: contain;
-	}
-
-	.text-content {
-		flex: 1;
+		padding: 40px 32px;
 		color: white;
-	}
-
-	.small {
-		font-size: 1.1rem;
-		margin: 0 0 12px 0;
-		opacity: 0.95;
+		box-sizing: border-box;
+		box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
 	}
 
 	h1 {
-		font-size: clamp(2.2rem, 5vw, 4.5rem);
-		line-height: 1.05;
-		margin: 0 0 20px 0;
+		margin: 0 0 10px;
+		font-size: clamp(2rem, 4vw, 3.5rem);
 		font-style: italic;
 	}
 
-	.description {
-		font-size: 1.1rem;
-		line-height: 1.6;
-		max-width: 520px;
-		margin-bottom: 28px;
+	.subtitle {
+		margin: 0 0 24px;
+		font-size: 1rem;
+		line-height: 1.5;
+		opacity: 0.95;
 	}
 
-	button {
+	.form {
+		display: grid;
+		gap: 18px;
+	}
+
+	label {
+		display: grid;
+		gap: 8px;
+	}
+
+	span {
+		font-weight: 700;
+	}
+
+	select,
+	input {
+		border: none;
+		border-radius: 16px;
+		padding: 14px 16px;
+		font-size: 1rem;
+		background: white;
+		color: #111;
+	}
+
+	.submit {
+		margin-top: 10px;
 		border: none;
 		background: #1f1f1f;
 		color: white;
-		padding: 16px 28px;
+		padding: 16px 24px;
 		border-radius: 999px;
 		font-size: 1rem;
 		cursor: pointer;
-		transition: transform 0.15s ease;
 	}
 
-	button:hover {
-		transform: translateY(-2px);
-	}
-
-	@media (max-width: 850px) {
-		.card {
-			flex-direction: column;
-			text-align: center;
-			padding: 32px 24px;
-		}
-
-		.description {
-			margin-left: auto;
-			margin-right: auto;
-		}
+	.submit:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
 	}
 </style>
