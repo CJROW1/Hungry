@@ -6,6 +6,7 @@
 		title?: string;
 		image?: string;
 		url?: string;
+		match_percentage?: number;
 	};
 
 	let {
@@ -35,6 +36,45 @@
 	function dismiss() {
 		console.log('dismiss result');
 	}
+	
+const imageKeywords = {
+        "Sushi": "sushi",
+        "Chinese": "asian-food",
+        "Indian": "curry",
+        "Vietnamese": "pho",
+        "Korean": "korean-bbq",
+        "Ramen": "ramen",
+        "Burgers": "burger",
+        "Pizza": "pizza",
+        "Pub": "wings",
+        "Breakfast": "pancakes",
+        "Bakery": "pastry",
+        "Mexican": "taco",
+        "Italian": "pasta",
+        "Steakhouse": "steak",
+        "Halal": "kebab",
+        "Middle Eastern": "hummus",
+        "Healthy": "salad",
+        "Cafe": "coffee",
+        "African": "stew",
+        "Seafood": "seafood",
+        "Deli": "sandwich"
+    };
+
+    function getKeyword(food: Food) {
+        if (!food) return "meal";
+        
+        // Search the Name and Category for our specific list first
+        const searchString = `${food.name || ''} ${food.category || ''}`.toLowerCase();
+        const match = Object.keys(imageKeywords).find(key => 
+            searchString.includes(key.toLowerCase())
+        );
+
+        if (match) return imageKeywords[match as keyof typeof imageKeywords];
+
+        // Fallback: Use the very first word of the category (most accurate for general cases)
+        return food.category?.split('/')[0].split(' ')[0].toLowerCase() || "food";
+    }
 </script>
 
 <svelte:head>
@@ -61,14 +101,19 @@
 			<div class="content">
 				<div class="photo-wrap">
 					<div class="photo-card">
-						<img
-							src={currentFood.image || '/food-placeholder.jpg'}
-							alt={currentFood.name || 'Food deal'}
-						/>
+    					<img
+							src={`https://loremflickr.com/500/500/${getKeyword(currentFood)},food/all?lock=${currentFood.id}`}
+        					loading="lazy"
+    					/>
 					</div>
 				</div>
 
 				<div class="center-copy">
+					{#if currentFood.match_percentage}
+        				<div class="match-badge">
+            				{currentFood.match_percentage}% MATCH
+        				</div>
+    				{/if}
 					<h2>The perfect match for you has arrived!</h2>
 
 					<p class="restaurant-name">
@@ -117,7 +162,21 @@
 		font-family: 'Inter', sans-serif;
 		background: #ff0000;
 	}
+.photo-card img {
+        background: #232323; /* Dark placeholder */
+        display: block;
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        object-fit: cover;
+        border-radius: 16px;
+        /* Smooth fade-in effect */
+        opacity: 0;
+        animation: fadeIn 0.4s ease-in forwards;
+    }
 
+    @keyframes fadeIn {
+        to { opacity: 1; }
+    }
 	.page {
 		min-height: 100vh;
 		background: #ff0000;
@@ -136,6 +195,19 @@
 		display: flex;
 		align-items: center;
 		padding: 0 32px;
+	}
+	.match-badge {
+    background: #ffffff;
+    color: #ff1a1a;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-family: 'League Spartan', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+    display: inline-block;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    letter-spacing: 0.05em;
 	}
 
 	.bottombar {

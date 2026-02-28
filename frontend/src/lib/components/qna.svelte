@@ -1,25 +1,56 @@
 <script>
-	import { goto } from '$app/navigation';
+    import { browser } from '$app/environment';
+    
+    let answers = {
+        mood: '',
+        budget: '',
+        group: '',
+        rating: '',
+        dietary: ''
+    };
 
-	let answers = {
-		mood: '',
-		budget: '',
-		group: '',
-		rating: '',
-		dietary: ''
-	};
+async function submitQuiz() {
+        if (!browser) return;
 
-	function submitQuiz() {
-		console.log('answers:', answers);
-		goto('/result');
-	}
+        // Import navigation
+        const { goto } = await import('$app/navigation');
 
-	$: isComplete =
-		answers.mood &&
-		answers.budget &&
-		answers.group &&
-		answers.rating &&
-		answers.dietary;
+        const moodMap = {
+            "Something filling": "Sushi Steakhouse Pasta Buffet BBQ Italian",
+            "Something quick": "Pizza Sandwiches Burgers Wraps FastFood",
+            "Something comforting": "Ramen Noodles Bakery Soup Diner",
+            "Something fun with friends": "Tacos Korean BBQ DimSum Wings Pub Mexican",
+            "Breakfast/brunch food": "Cafe Pancakes Breakfast Pastry Smoothie"
+        };
+
+        const prefs = {
+            category: moodMap[answers.mood] || "General",
+            vibe: answers.group,
+            max_price: answers.budget === "Budget-friendly" ? 15.0 : 35.0,
+            min_rating: answers.rating === "Don’t care" ? 0.0 : parseFloat(answers.rating),
+            dietary: answers.dietary === "No preference" ? "None" : answers.dietary
+        };
+
+        try {
+            // Using 127.0.0.1 is more stable for CORS than 'localhost'
+            const response = await fetch('http://127.0.0.1:8000/api/recommendations', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(prefs)
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                sessionStorage.setItem('hungryResults', JSON.stringify(data.results));
+                // Await the navigation
+                await goto('/result'); 
+            }
+        } catch (err) {
+            console.error("Connection failed:", err);
+        }
+    }
+
+    $: isComplete = answers.mood && answers.budget && answers.group && answers.rating && answers.dietary;
 </script>
 
 <div class="page">
