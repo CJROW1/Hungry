@@ -1,70 +1,101 @@
 import json
 import asyncio
+import logging
+import random
+# Import the module directly to avoid name collisions
+import playwright_stealth
 from playwright.async_api import async_playwright
 
+logger = logging.getLogger(__name__)
+
 async def run_scraper_with_cookies(search_query: str):
+    logger.info(f"!!! SCRAPER STARTING: Query='{search_query}'")
     async with async_playwright() as p:
-        # Launch browser (Set headless=False to watch it during the demo!)
-        browser = await p.chromium.launch(headless=True)
-        context = await browser.new_context(
-            user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-        )
-
-        # 1. Load and Clean Cookies
         try:
-            with open('cookies.json', 'r') as f:
-                raw_cookies = json.load(f)
+            browser = await p.chromium.launch(
+                headless=True,
+                args=[
+                    "--no-sandbox", 
+                    "--disable-setuid-sandbox", 
+                    "--disable-dev-shm-usage",
+                    "--disable-blink-features=AutomationControlled"
+                ]
+            )
             
-            cleaned_cookies = []
-            for c in raw_cookies:
-                # Playwright fix for 'sameSite' values
-                s_site = c.get("sameSite", "Lax")
-                if s_site == "unspecified": s_site = "Lax"
-                if s_site == "no_restriction": s_site = "None"
+            context = await browser.new_context(
+                viewport={'width': 1280, 'height': 800},
+                user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+            )
+
+            page = await context.new_page()
+            
+            # THE FIX: Call the function directly from the module
+            # This avoids the "module object is not callable" error
+            await playwright_stealth.stealth(page)
+            logger.info("SCRAPER: Stealth applied successfully.")
+
+            # 1. Cookie Injection
+            try:
+                with open('cookies.json', 'r') as f:
+                    raw_cookies = json.load(f)
                 
-                cleaned_cookies.append({
-                    "name": c["name"],
-                    "value": c["value"],
-                    "domain": c["domain"],
-                    "path": c["path"],
-                    "secure": c.get("secure", True),
-                    "httpOnly": c.get("httpOnly", False),
-                    "sameSite": s_site
-                })
-            await context.add_cookies(cleaned_cookies)
-        except FileNotFoundError:
-            return [{"error": "cookies.json missing"}]
+                cleaned_cookies = []
+                for c in raw_cookies:
+                    domain = c.get("domain", "")
+                    if "ubereats.com" in domain or "uber.com" in domain:
+                        cleaned_cookies.append({
+                            "name": c["name"],
+                            "value": c["value"],
+                            "domain": domain if domain.startswith('.') else f".{domain}",
+                            "path": c.get("path", "/"),
+                            "secure": True,
+                            "sameSite": "Lax"
+                        })
+                await context.add_cookies(cleaned_cookies)
+                logger.info("SCRAPER: Cookies injected.")
+            except Exception as e:
+                logger.error(f"Cookie Error: {e}")
 
-        page = await context.new_page()
-        
-        # 2. Go to Search URL
-        # Note: Your address is already in your cookies!
-        url = f"https://www.ubereats.com/ca/search?q={search_query}"
-        await page.goto(url, wait_until="networkidle")
+            # 2. Navigation & Hydration
+            url = f"https://www.ubereats.com/ca/search?q={search_query}"
+            # Using 'commit' to get in fast, then we handle the wait manually
+            await page.goto(url, wait_until="commit", timeout=30000)
+            
+            # Wait for the "Skeleton" to disappear and text to appear
+            logger.info("SCRAPER: Waiting for content...")
+            await asyncio.sleep(5) 
+            await page.mouse.wheel(0, 1500)
+            await asyncio.sleep(2)
 
-        # 3. The "Extraction" Magic
-        # We wait for the first h3 (restaurant name) to appear
-        await page.wait_for_selector('h3', timeout=10000)
-
-        results = await page.evaluate("""() => {
-            const cards = Array.from(document.querySelectorAll('a[href*="/store/"]'));
-            return cards.map(card => {
-                const name = card.querySelector('h3')?.innerText;
-                const text = card.innerText;
+            # 3. Extraction with 2026 Selectors
+            results = await page.evaluate(r"""() => {
+                const links = Array.from(document.querySelectorAll('a[href*="/store/"]'));
+                const seen = new Set();
                 
-                // Regex to find prices ($10.99) and ratings (4.5)
-                const priceMatch = text.match(/\$\d+\.\d+/);
-                const ratingMatch = text.match(/(\d\.\d)\s\(/);
-                
-                return {
-                    "restaurant_name": name || "Unknown",
-                    "price_str": priceMatch ? priceMatch[0] : "N/A",
-                    "rating": ratingMatch ? ratingMatch[1] : "N/A",
-                    "promo": text.includes("Buy 1") ? "BOGO" : null,
-                    "is_ad": text.includes("Sponsored")
-                };
-            }).filter(item => item.restaurant_name !== "Unknown");
-        }""")
+                return links.map(link => {
+                    const nameTag = link.querySelector('h3, h4, span[data-testid="rich-text"]');
+                    const name = nameTag ? nameTag.innerText.trim() : "Unknown";
+                    const text = link.innerText;
+                    
+                    const price = text.match(/\$\d+\.\d+/);
+                    const promo = ["Buy 1", "1 free", "BOGO", "Offer"].some(w => text.includes(w));
+                    
+                    return {
+                        "restaurant_name": name,
+                        "price_str": price ? price[0] : "N/A",
+                        "promo": promo ? "BOGO" : null
+                    };
+                }).filter(item => {
+                    if (item.restaurant_name === "Unknown" || seen.has(item.restaurant_name)) return false;
+                    seen.add(item.restaurant_name);
+                    return true;
+                });
+            }""")
 
-        await browser.close()
-        return results
+            await browser.close()
+            logger.info(f"!!! SUCCESS: Found {len(results)} items.")
+            return results
+
+        except Exception as e:
+            logger.error(f"!!! GLOBAL ERROR: {str(e)}")
+            return [{"error": str(e)}]

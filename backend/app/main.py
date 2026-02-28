@@ -1,42 +1,23 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from typing import TypedDict
-from pydantic import BaseModel
-import os
 from .scraper import run_scraper_with_cookies
+import logging
+
+# Configure logging to show up in Docker
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("app.main")
 
 app = FastAPI()
 
-# Allow your frontend to talk to the backend
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # For the hackathon, "*" is fine. For production, specify your URL.
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-@app.get("/")
-def home():
-    return {"message": "Backend is reachable!"}
-
 @app.get("/api/search")
-async def search_deals(q: str):
-    # This calls the script you just pasted
-    results = await run_scraper_with_cookies(q)
-    return {"results": results}
-
-class GreetingRequest(BaseModel):
-    name: str
-    age: int
-
-    
-class GreetingResponse(BaseModel):
-    message: str
+async def search(q: str):
+    logger.info(f"!!! GATEWAY: Received request for {q}")
+    try:
+        results = await run_scraper_with_cookies(q)
+        return {"status": "success", "query": q, "results": results}
+    except Exception as e:
+        logger.error(f"!!! GATEWAY ERROR: {str(e)}")
+        return {"status": "error", "message": str(e)}
 
 @app.post("/greeting")
-def greeting(request:GreetingRequest) -> GreetingResponse:
-    return GreetingResponse(
-        message = f"Hello {request.name} You are {request.age}"
-    )
-    
+async def greeting():
+    return {"message": "Hello from Hungry Buddy Backend"}
