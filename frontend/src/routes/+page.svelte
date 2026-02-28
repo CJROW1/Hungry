@@ -1,5 +1,6 @@
 <script>
     import {onMount} from "svelte";
+    import Lam from "./lam.svelte";
 
     let formData = $state({
         username: "",
@@ -13,19 +14,21 @@
     }
 
     async function handleInput() {
+        // fetch("https://hungry.tungdo.dev/api/greeting", {
         fetch("http://localhost:8000/greeting", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                name: formData.username,
-                age: Number(formData.age),
-            })
+            }//,
+            // body: JSON.stringify({
+            //     name: formData.username,
+            //     age: Number(formData.age),
+            // })
         })
         .then(response => response.json())
         .then(data => {
             user = data.message;
+            console.table(data);
         })
     }
 
@@ -60,3 +63,4 @@
     inputmode="numeric" bind:value={formData.age} placeholder="Enter age" maxlength="3"/>
     <button onclick={handleInput} type="submit">Submit</button>
 </form>
+<Lam />
