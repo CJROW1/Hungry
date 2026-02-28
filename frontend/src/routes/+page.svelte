@@ -10,10 +10,10 @@
     //     e.currentTarget.value = cleanedNum;
     // }
 
-    let food = $state("")
+    let foods = $state("");
 
-    onMount(async () =>
-        fetch("http://localhost:8000/api/search?q={question}", {
+    async function testSearchAPI() {
+        fetch("http://localhost:8000/api/search?q=sushi", {
             method: "GET",
             headers: {
                 "Content-Type": "application/json"
@@ -21,11 +21,11 @@
         })
         .then(response => response.json())
         .then(data => {
-            food = data.message;
+            foods = data.results;
             console.log("table under this");
-            console.table(food);
+            console.table($state.snapshot(foods));
         })
-    )
+    }
 </script>
 
 <!-- <form> -->
@@ -39,4 +39,10 @@
 <!--     <button onclick={handleInput} type="submit">Submit</button> -->
 <!-- </form> -->
 
-<p>Testing API call: {food}</p>
+<button onclick={testSearchAPI}>Test Search API (query: sushi)</button>
+{#each foods as food}
+    <p>{food.name}</p>
+{/each}
+
+<Qna />
+<Result />
