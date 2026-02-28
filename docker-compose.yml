@@ -22,7 +22,7 @@ services:
       - redis
 
   postgres:
-    image: postgres:latest
+    image: postgres:17-alpine
     environment:
       POSTGRES_USER: app
       POSTGRES_PASSWORD: app
