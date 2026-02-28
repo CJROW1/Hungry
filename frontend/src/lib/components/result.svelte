@@ -28,6 +28,8 @@
 	}
 
 	function takeDeal() {
+        console.log($state.snapshot(currentFood));
+        console.log(getKeyword($state.snapshot(currentFood)));
 		if (currentFood?.url) {
 			window.open(currentFood.url, '_blank');
 		}
@@ -107,8 +109,9 @@ const imageKeywords = {
 				<div class="photo-wrap">
 					<div class="photo-card">
     					<img
-							src={`https://loremflickr.com/500/500/${getKeyword(currentFood)},food/all?lock=${currentFood.id}`}
+							src={`images/${getKeyword(currentFood)}.jpg`}
         					loading="lazy"
+                            alt="food"
     					/>
 					</div>
 				</div>

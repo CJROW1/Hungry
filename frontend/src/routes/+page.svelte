@@ -8,29 +8,29 @@
     //     e.currentTarget.value = cleanedNum;
     // }
 
-    let foods = $state();
+    // let foods = $state();
 
-    async function testRecommendationAPI() {
-        fetch("http://localhost:8000/api/recommendations", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                "category": "Pizza",
-                "vibe": "Student Staple",
-                "max_price": 100,
-                "min_rating": 0,
-                "dietary": "",
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            foods = data.results;
-            console.log("table under this");
-            console.table($state.snapshot(foods));
-        })
-    }
+    // async function testRecommendationAPI() {
+    //     fetch("http://localhost:8000/api/recommendations", {
+    //         method: "POST",
+    //         headers: {
+    //             "Content-Type": "application/json"
+    //         },
+    //         body: JSON.stringify({
+    //             "category": "Pizza",
+    //             "vibe": "Student Staple",
+    //             "max_price": 100,
+    //             "min_rating": 0,
+    //             "dietary": "",
+    //         })
+    //     })
+    //     .then(response => response.json())
+    //     .then(data => {
+    //         foods = data.results;
+    //         console.log("table under this");
+    //         console.table($state.snapshot(foods));
+    //     })
+    // }
 </script>
 
 <!-- <form> -->
@@ -44,10 +44,10 @@
 <!--     <button onclick={handleInput} type="submit">Submit</button> -->
 <!-- </form> -->
 
-<button onclick={testRecommendationAPI}>Test Search API (query: sushi)</button>
-{#each foods as food}
-    <p>{food.name}</p>
-{/each}
+<!-- <button onclick={testRecommendationAPI}>Test Search API (query: sushi)</button> -->
+<!-- {#each foods as food} -->
+<!--     <p>{food.name}</p> -->
+<!-- {/each} -->
 
 <Intro />
 
