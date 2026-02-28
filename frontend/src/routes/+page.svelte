@@ -1,6 +1,5 @@
 <script>
     import Intro from "$lib/components/intro.svelte";
-    import Result from "$lib/components/result.svelte";
 
 
     // function cleanNumInput(e) {
@@ -51,5 +50,4 @@
 {/each}
 
 <Intro />
-<Result />
 
