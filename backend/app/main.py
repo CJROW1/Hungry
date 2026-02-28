@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
-# 1. CORS Setup
+# 1. CORS Configuration for React/Vite (Port 5173)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -16,16 +16,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 2. Path Logic
+# 2. Path Logic for Docker/Arch Linux
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_PATH = os.path.join(BASE_DIR, "data", "deals.json")
 
-# 3. The 5-Parameter Quiz Model
+# 3. The 5-Parameter Data Model
 class QuizPreferences(BaseModel):
     category: str       # e.g., "Sushi", "Pizza"
     vibe: str           # e.g., "Student Staple", "Late Night"
-    max_price: float    # User's budget
-    min_rating: float   # e.g., 4.0
+    max_price: float    # User's budget limit
+    min_rating: float   # Minimum quality (e.g., 4.0)
     dietary: str        # e.g., "Vegan", "Halal", "None"
 
 def load_db():
@@ -36,69 +36,86 @@ def load_db():
         print(f"Error loading JSON: {e}")
         return []
 
-# --- ROUTES ---
+# --- CORE LOGIC ---
 
 @app.get("/api/search")
 async def general_search(q: str = ""):
-    """Better Search: Partial matching across multiple fields"""
+    """Standard search tool for the main landing page"""
     db = load_db()
     if not q: return {"results": db}
     
     query = q.lower()
-    results = []
-    for item in db:
-        # Check if query is in name, category, or vibe description
-        if (query in item["name"].lower() or 
-            query in item["category"].lower() or 
-            query in item.get("vibe", "").lower()):
-            results.append(item)
-            
+    results = [
+        item for item in db 
+        if query in item["name"].lower() or 
+           query in item["category"].lower() or 
+           query in item.get("vibe", "").lower()
+    ]
     return {"results": results}
 
 @app.post("/api/recommendations")
 async def get_recommendations(prefs: QuizPreferences):
-    """5-Parameter Logic for Page 2"""
+    """The 'Brain' of the Page 1 to Page 2 flow"""
     db = load_db()
     matches = []
 
     for item in db:
-        # Data Prep: Handle price formatting
+        # Data Normalization
         price_val = float(item["price"].replace("$", ""))
-        item_rating = item.get("rating", 4.0) # Default if missing
+        item_rating = item.get("rating", 4.0)
+        promo_text = item.get("promo", "").upper()
         
-        # --- SCORING & FILTERING ENGINE ---
-        score = 0
-        
-        # A. Category Match (High Weight)
-        if prefs.category.lower() in item["category"].lower():
-            score += 15
-        
-        # B. Vibe Match (Medium Weight)
-        if prefs.vibe.lower() in item.get("vibe", "").lower():
-            score += 8
-
-        # C. Dietary Filter (Strict)
-        # Checks if the dietary requirement is mentioned in vibes or category
+        # --- PARAMETER 1: DIETARY (Strict Filter) ---
         if prefs.dietary.lower() != "none":
             searchable_tags = (item["category"] + item.get("vibe", "")).lower()
             if prefs.dietary.lower() not in searchable_tags:
-                continue # Hard skip if it doesn't meet dietary needs
+                continue # Discard if it doesn't meet dietary needs
 
-        # D. Price & Rating (Hard Filters)
-        if price_val <= prefs.max_price and item_rating >= prefs.min_rating:
-            # Bonus: Reward higher ratings in the score
-            score += (item_rating * 2)
-            matches.append({**item, "match_score": round(score, 2)})
+        # --- PARAMETER 2 & 3: PRICE & RATING (Strict Filters) ---
+        if price_val > prefs.max_price or item_rating < prefs.min_rating:
+            continue # Discard if too expensive or low quality
 
-    # Sort by Score (Descending)
+        # --- SCORING ENGINE (Strength of Deal + Matching) ---
+        score = 0
+        
+        # Deal Strength Logic
+        if "BOGO" in promo_text:
+            score += 12  # BOGO is the king of deals
+        elif "%" in promo_text or "OFF" in promo_text:
+            score += 8   # High percentage value
+        elif "FREE" in promo_text:
+            score += 5   # Free item/side
+        elif promo_text:
+            score += 2   # Standard value pick
+
+        # Parameter 4: Category Match (Primary weight)
+        if prefs.category.lower() in item["category"].lower():
+            score += 15
+        
+        # Parameter 5: Vibe Match (Secondary weight)
+        if prefs.vibe.lower() in item.get("vibe", "").lower():
+            score += 8
+            
+        # Quality Bonus
+        score += (item_rating * 1.5)
+
+        # Store result with its calculated score
+        matches.append({**item, "match_score": round(score, 2)})
+
+    # Sort results so the 'Perfect Match' + 'Best Deal' is first
     matches.sort(key=lambda x: x["match_score"], reverse=True)
 
-    # Fallback Logic
+    # Fallback: If no strict matches found, return top 4 BOGO deals generally
     if not matches:
         return {
             "status": "fallback",
-            "message": "Nothing perfectly matched, but here are the best BOGO deals!",
-            "results": [i for i in db if i["promo"] == "BOGO"][:4]
+            "message": "No perfect matches, but these are the strongest deals right now!",
+            "results": [i for i in db if "BOGO" in i.get("promo", "")][:4]
         }
 
     return {"status": "success", "results": matches}
+
+if __name__ == "__main__":
+    import uvicorn
+    # Listening on 0.0.0.0 is required for Docker access
+    uvicorn.run(app, host="0.0.0.0", port=8000)
