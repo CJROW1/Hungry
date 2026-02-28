@@ -33,7 +33,7 @@
 	:global(body) {
 		margin: 0;
 		font-family: Arial, sans-serif;
-		background: #ff2b2b;
+		background: #ff0000;
 	}
 
 	.page {
