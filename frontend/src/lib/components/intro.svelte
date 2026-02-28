@@ -6,6 +6,8 @@
 	}
 </script>
 
+
+
 <div class="page">
 	<div class="card">
 		<div class="character-wrap">

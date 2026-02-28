@@ -1,6 +1,5 @@
 <script>
     import Intro from "$lib/components/intro.svelte";
-    import Qna from "$lib/components/qna.svelte";
     import Result from "$lib/components/result.svelte";
 
 
@@ -52,6 +51,5 @@
 {/each}
 
 <Intro />
-<Qna />
 <Result />
 
