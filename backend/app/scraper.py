@@ -2,8 +2,6 @@ import json
 import asyncio
 import logging
 import random
-# Import the module directly to avoid name collisions
-import playwright_stealth
 from playwright.async_api import async_playwright
 
 logger = logging.getLogger(__name__)
@@ -12,62 +10,57 @@ async def run_scraper_with_cookies(search_query: str):
     logger.info(f"!!! SCRAPER STARTING: Query='{search_query}'")
     async with async_playwright() as p:
         try:
+            # 1. Launch with Native Stealth
             browser = await p.chromium.launch(
                 headless=True,
-                args=[
-                    "--no-sandbox", 
-                    "--disable-setuid-sandbox", 
-                    "--disable-dev-shm-usage",
-                    "--disable-blink-features=AutomationControlled"
-                ]
+                args=["--no-sandbox", "--disable-dev-shm-usage", "--disable-blink-features=AutomationControlled"]
             )
-            
             context = await browser.new_context(
                 viewport={'width': 1280, 'height': 800},
                 user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
             )
-
             page = await context.new_page()
-            
-            # THE FIX: Call the function directly from the module
-            # This avoids the "module object is not callable" error
-            await playwright_stealth.stealth(page)
-            logger.info("SCRAPER: Stealth applied successfully.")
 
-            # 1. Cookie Injection
+            # 2. Strict Cookie Injection (Correcting Firefox values)
             try:
                 with open('cookies.json', 'r') as f:
                     raw_cookies = json.load(f)
                 
-                cleaned_cookies = []
+                formatted_cookies = []
                 for c in raw_cookies:
-                    domain = c.get("domain", "")
-                    if "ubereats.com" in domain or "uber.com" in domain:
-                        cleaned_cookies.append({
-                            "name": c["name"],
-                            "value": c["value"],
-                            "domain": domain if domain.startswith('.') else f".{domain}",
-                            "path": c.get("path", "/"),
-                            "secure": True,
-                            "sameSite": "Lax"
-                        })
-                await context.add_cookies(cleaned_cookies)
-                logger.info("SCRAPER: Cookies injected.")
+                    cookie = {
+                        "name": str(c["name"]),
+                        "value": str(c["value"]),
+                        "domain": ".ubereats.com",
+                        "path": "/",
+                        "secure": True
+                    }
+                    ss = c.get("sameSite", "Lax").lower()
+                    if ss == "no_restriction": cookie["sameSite"] = "None"
+                    elif ss == "unspecified": cookie["sameSite"] = "Lax"
+                    else: cookie["sameSite"] = "Lax"
+                    formatted_cookies.append(cookie)
+                
+                await context.add_cookies(formatted_cookies)
+                logger.info(f"SCRAPER: {len(formatted_cookies)} cookies applied.")
             except Exception as e:
-                logger.error(f"Cookie Error: {e}")
+                logger.error(f"Cookie injection failed: {e}")
 
-            # 2. Navigation & Hydration
+            # 3. Navigation
             url = f"https://www.ubereats.com/ca/search?q={search_query}"
-            # Using 'commit' to get in fast, then we handle the wait manually
-            await page.goto(url, wait_until="commit", timeout=30000)
-            
-            # Wait for the "Skeleton" to disappear and text to appear
-            logger.info("SCRAPER: Waiting for content...")
-            await asyncio.sleep(5) 
-            await page.mouse.wheel(0, 1500)
-            await asyncio.sleep(2)
+            logger.info(f"SCRAPER: Navigating to {url}")
+            await page.goto(url, wait_until="domcontentloaded", timeout=40000)
 
-            # 3. Extraction with 2026 Selectors
+            # 4. FORCE HYDRATION (The "Scroll-Wake" Protocol)
+            logger.info("SCRAPER: Forcing price hydration via scrolls...")
+            # Scroll down and back up twice to force the lazy-loader to wake up
+            for _ in range(2):
+                await page.mouse.wheel(0, 1500)
+                await asyncio.sleep(2)
+                await page.mouse.wheel(0, -1000)
+                await asyncio.sleep(1)
+
+            # 5. Extraction Logic (The "Deep Text" Extractor)
             results = await page.evaluate(r"""() => {
                 const links = Array.from(document.querySelectorAll('a[href*="/store/"]'));
                 const seen = new Set();
@@ -75,15 +68,20 @@ async def run_scraper_with_cookies(search_query: str):
                 return links.map(link => {
                     const nameTag = link.querySelector('h3, h4, span[data-testid="rich-text"]');
                     const name = nameTag ? nameTag.innerText.trim() : "Unknown";
-                    const text = link.innerText;
                     
-                    const price = text.match(/\$\d+\.\d+/);
-                    const promo = ["Buy 1", "1 free", "BOGO", "Offer"].some(w => text.includes(w));
+                    // Uber 2026 Price Format Check
+                    // We check textContent because it finds text that innerText sometimes misses
+                    const fullText = link.textContent;
+                    const priceMatch = fullText.match(/\$\d+\.\d+/);
+                    
+                    // Promo Check (Buy 1, BOGO, 1 free, Spend $X Get $Y)
+                    const promoKeywords = ["Buy 1", "BOGO", "1 free", "free item", "Offer", "Spend"];
+                    const hasPromo = promoKeywords.some(word => fullText.includes(word));
                     
                     return {
                         "restaurant_name": name,
-                        "price_str": price ? price[0] : "N/A",
-                        "promo": promo ? "BOGO" : null
+                        "price_str": priceMatch ? priceMatch[0] : "N/A",
+                        "promo": hasPromo ? "BOGO" : null
                     };
                 }).filter(item => {
                     if (item.restaurant_name === "Unknown" || seen.has(item.restaurant_name)) return false;
@@ -93,9 +91,9 @@ async def run_scraper_with_cookies(search_query: str):
             }""")
 
             await browser.close()
-            logger.info(f"!!! SUCCESS: Found {len(results)} items.")
+            logger.info(f"!!! SUCCESS: Found {len(results)} items at UVic.")
             return results
 
         except Exception as e:
-            logger.error(f"!!! GLOBAL ERROR: {str(e)}")
+            logger.error(f"!!! ERROR: {str(e)}")
             return [{"error": str(e)}]
