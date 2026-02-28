@@ -1,0 +1,152 @@
+[
+  {
+    "id": 1,
+    "name": "Sushi Mago (Shelbourne St)",
+    "price": "$8.95",
+    "promo": "BOGO",
+    "category": "Sushi",
+    "vibe": "Student Staple",
+    "distance": "0.8km",
+    "image_url": "https://example.com/sushi-mago.jpg"
+  },
+  {
+    "id": 2,
+    "name": "70'ees Pizza (Douglas St)",
+    "price": "$15.99",
+    "promo": "BOGO",
+    "category": "Pizza",
+    "vibe": "Late Night",
+    "distance": "4.2km",
+    "image_url": "https://example.com/70ees.jpg"
+  },
+  {
+    "id": 3,
+    "name": "Fujiya Foods",
+    "price": "$7.20",
+    "promo": "Value King",
+    "category": "Sushi",
+    "vibe": "Student Staple",
+    "distance": "1.1km",
+    "image_url": "https://example.com/fujiya.jpg"
+  },
+  {
+    "id": 4,
+    "name": "Bold Shawarma",
+    "price": "$11.50",
+    "promo": "Free Item",
+    "category": "Middle Eastern",
+    "vibe": "Halal",
+    "distance": "3.8km",
+    "image_url": "https://example.com/bold.jpg"
+  },
+  {
+    "id": 5,
+    "name": "Bin 4 Burger Lounge",
+    "price": "$10.50",
+    "promo": "50% Off After 9PM",
+    "category": "Burgers",
+    "vibe": "Late Night",
+    "distance": "2.1km",
+    "image_url": "https://example.com/bin4.jpg"
+  },
+  {
+    "id": 6,
+    "name": "Noodlebox (Shelbourne)",
+    "price": "$13.50",
+    "promo": "Free Side",
+    "category": "Noodles",
+    "vibe": "Student Staple",
+    "distance": "0.9km",
+    "image_url": "https://example.com/noodlebox.jpg"
+  },
+  {
+    "id": 7,
+    "name": "Momo Sushi (Victoria)",
+    "price": "$10.75",
+    "promo": "BOGO",
+    "category": "Sushi",
+    "vibe": "Reliable",
+    "distance": "3.5km",
+    "image_url": "https://example.com/momo.jpg"
+  },
+  {
+    "id": 8,
+    "name": "KFC (Douglas Street)",
+    "price": "$12.99",
+    "promo": "BOGO",
+    "category": "Chicken",
+    "vibe": "Fast Food",
+    "distance": "3.9km",
+    "image_url": "https://example.com/kfc.jpg"
+  },
+  {
+    "id": 9,
+    "name": "Freshslice Pizza (Government St)",
+    "price": "$13.00",
+    "promo": "BOGO",
+    "category": "Pizza",
+    "vibe": "Quick Bit",
+    "distance": "4.5km",
+    "image_url": "https://example.com/freshslice.jpg"
+  },
+  {
+    "id": 10,
+    "name": "Uptown Bistro",
+    "price": "$14.00",
+    "promo": "BOGO",
+    "category": "Canadian",
+    "vibe": "Brunch",
+    "distance": "2.8km",
+    "image_url": "https://example.com/uptown.jpg"
+  },
+  {
+    "id": 11,
+    "name": "Grad House (UVic)",
+    "price": "$9.00",
+    "promo": "Student Price",
+    "category": "Pub Food",
+    "vibe": "Campus",
+    "distance": "0.2km",
+    "image_url": "https://example.com/gradhouse.jpg"
+  },
+  {
+    "id": 12,
+    "name": "Sizzling Tandoor",
+    "price": "$18.00",
+    "promo": "Save $11 over $40",
+    "category": "Indian",
+    "vibe": "Group Meal",
+    "distance": "4.1km",
+    "image_url": "https://example.com/tandoor.jpg"
+  },
+  {
+    "id": 13,
+    "name": "Little Caesars (Cedar Hill)",
+    "price": "$9.99",
+    "promo": "Free Crazy Bread",
+    "category": "Pizza",
+    "vibe": "Budget",
+    "distance": "1.4km",
+    "image_url": "https://example.com/little-caesars.jpg"
+  },
+  {
+    "id": 14,
+    "name": "Pagliacci's",
+    "price": "$15.00",
+    "promo": "Unlimited Bread",
+    "category": "Italian",
+    "vibe": "Classic",
+    "distance": "4.3km",
+    "image_url": "https://example.com/pags.jpg"
+  },
+  {
+    "id": 15,
+    "name": "McDonald's (Shelbourne)",
+    "price": "$6.50",
+    "promo": "Value Pick",
+    "category": "Fast Food",
+    "vibe": "Quick",
+    "distance": "1.2km",
+    "image_url": "https://example.com/mcd.jpg"
+  }
+]
