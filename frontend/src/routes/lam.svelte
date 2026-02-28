@@ -1,10 +1,5 @@
 <p>Lam's stuff here</p>
-<!doctype html>
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<style>
+	    <style>
 			* {
 				box-sizing: border-box;
 			}
@@ -16,7 +11,7 @@
 				gap: 10px;
 			}
 
-			.
+			
 			
 			@media screen and (max-width: 800px) {
   				.header {
@@ -24,10 +19,5 @@
   				}
 			}
 		</style>
-	</head>
-    <body>
-        <div class ="header"></div>
-    </body>
 
-</html>
 
