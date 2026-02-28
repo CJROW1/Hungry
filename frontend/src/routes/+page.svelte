@@ -3,64 +3,40 @@
     import Qna from "$lib/components/qna.svelte";
     import Result from "$lib/components/result.svelte";
 
-    let formData = $state({
-        username: "",
-        age: ""
-    })
 
-    function cleanNumInput(e) {
-        const cleanedNum = e.currentTarget.value.replace(/\D/g, '');
-        formData.age = cleanedNum;
-        e.currentTarget.value = cleanedNum;
-    }
+    // function cleanNumInput(e) {
+    //     const cleanedNum = e.currentTarget.value.replace(/\D/g, '');
+    //     formData.age = cleanedNum;
+    //     e.currentTarget.value = cleanedNum;
+    // }
 
-    async function handleInput() {
-        // fetch("https://hungry.tungdo.dev/api/greeting", {
-        fetch("http://localhost:8000/greeting", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            }//,
-            // body: JSON.stringify({
-            //     name: formData.username,
-            //     age: Number(formData.age),
-            // })
-        })
-        .then(response => response.json())
-        .then(data => {
-            user = data.message;
-            console.table(data);
-        })
-    }
-
-    let user = $state("")
+    let food = $state("")
 
     onMount(async () =>
-        fetch("http://localhost:8000/greeting", {
-            method: "POST",
+        fetch("http://localhost:8000/api/search?q={question}", {
+            method: "GET",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({
-                name: "Jesse",
-                age: 99,
-            })
         })
         .then(response => response.json())
         .then(data => {
-            user = data.message;
+            food = data.message;
+            console.log("table under this");
+            console.table(food);
         })
     )
 </script>
 
-<p>Testing API call: {user}</p>
-<form>
-    <input 
-        id="email" type="text" 
-        bind:value={formData.username} placeholder="Enter name"
-    />
-    <input id="age" type="text" 
-    oninput={cleanNumInput}
-    inputmode="numeric" bind:value={formData.age} placeholder="Enter age" maxlength="3"/>
-    <button onclick={handleInput} type="submit">Submit</button>
-</form>
+<!-- <form> -->
+<!--     <input  -->
+<!--         id="email" type="text"  -->
+<!--         bind:value={formData.username} placeholder="Enter name" -->
+<!--     /> -->
+<!--     <input id="age" type="text"  -->
+<!--     oninput={cleanNumInput} -->
+<!--     inputmode="numeric" bind:value={formData.age} placeholder="Enter age" maxlength="3"/> -->
+<!--     <button onclick={handleInput} type="submit">Submit</button> -->
+<!-- </form> -->
+
+<p>Testing API call: {food}</p>
