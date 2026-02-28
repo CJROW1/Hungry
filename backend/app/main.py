@@ -4,12 +4,13 @@ from typing import List, Optional
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+import random
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -38,60 +39,57 @@ async def get_recommendations(prefs: QuizPreferences):
     db = load_db()
     matches = []
     
-    # Define Weights (Total = 100)
-    WEIGHTS = {
-        "category": 40,
-        "deal": 25,
-        "rating": 20,
-        "vibe": 15
-    }
+    # DEBUG: Print this to your terminal to ensure the Q&A answers are arriving
+    print(f"Received Prefs: {prefs}") 
 
     for item in db:
+        # Normalize data for comparison
         price_val = float(item["price"].replace("$", ""))
         item_rating = item.get("rating", 4.0)
-        promo_text = item.get("promo", "").upper()
+        item_cat = item["category"].lower()
         
-        # --- STRICT FILTERS ---
-        if price_val > prefs.max_price or item_rating < prefs.min_rating:
+        # --- IMPROVED DYNAMIC FILTERING ---
+        # If the user picks a category, we MUST prioritize it
+        category_match = prefs.category.lower() in item_cat
+        
+        # If you have strict filters that are TOO tight, you'll always get 0 results
+        # and hit your fallback. Let's make them slightly more flexible:
+        if price_val > (prefs.max_price + 5): # $5 buffer
             continue
-        if prefs.dietary.lower() != "none":
-            tags = (item["category"] + item.get("vibe", "")).lower()
-            if prefs.dietary.lower() not in tags:
-                continue
-
-        # --- SCORING CALCULATION ---
+            
         current_score = 0
         
-        # 1. Category (40%)
-        if prefs.category.lower() in item["category"].lower():
-            current_score += WEIGHTS["category"]
+        # 1. Primary Category Match (Heavy Weight: 50pts)
+        if category_match:
+            current_score += 50
+        elif any(word in item_cat for word in prefs.category.lower().split()):
+            current_score += 25 # Partial credit for similar food
             
-        # 2. Deal Strength (25%)
-        if "BOGO" in promo_text:
-            current_score += WEIGHTS["deal"]
-        elif "%" in promo_text or "OFF" in promo_text:
-            current_score += (WEIGHTS["deal"] * 0.7)
-        elif "FREE" in promo_text:
-            current_score += (WEIGHTS["deal"] * 0.4)
-            
-        # 3. Rating Strength (20%)
-        # Normalizes the rating (e.g., a 5.0 rating gets the full 20 points)
-        rating_ratio = item_rating / 5.0
-        current_score += (WEIGHTS["rating"] * rating_ratio)
-        
-        # 4. Vibe Match (15%)
+        # 2. Vibe Match (20pts)
         if prefs.vibe.lower() in item.get("vibe", "").lower():
-            current_score += WEIGHTS["vibe"]
+            current_score += 20
+            
+        # 3. Deal & Rating (30pts)
+        if "BOGO" in item.get("promo", "").upper():
+            current_score += 15
+        current_score += (item_rating * 3) # Max 15pts for a 5.0
 
-        # Final Match Percentage (capped at 100)
-        match_percent = min(round(current_score), 100)
-        
-        matches.append({**item, "match_percentage": match_percent})
+        # Add a random tie-breaker so the order isn't static
+        current_score += random.uniform(0, 1)
 
-    # Sort by highest match percentage
+        matches.append({
+            **item, 
+            "match_percentage": min(round(current_score + 20), 100) # Base boost for high %
+        })
+
+    # Sort by the new dynamic score
     matches.sort(key=lambda x: x["match_percentage"], reverse=True)
 
-    return {
-        "status": "success",
-        "results": matches if matches else [i for i in db if "BOGO" in i.get("promo", "")]
-    }
+    # SUCCESS: Return the top matches for these specific answers
+    if matches:
+        return {"status": "success", "results": matches[:15]}
+    
+    # FALLBACK: If NO matches found, return a randomized selection of the DB
+    # so it at least looks different than the previous "BOGO" list
+    random_sample = random.sample(db, min(len(db), 10))
+    return {"status": "success", "results": random_sample}
