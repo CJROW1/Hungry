@@ -31,7 +31,7 @@
         };
 
         try {
-            const response = await fetch('https://hungry.tungdo.dev/api/api/recommendations', {
+            const response = await fetch('/api/recommendations', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(prefs)
