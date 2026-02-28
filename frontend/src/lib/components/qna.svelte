@@ -19,7 +19,6 @@
 		goto(`/results?${params.toString()}`);
 	}
 </script>
-
 <div class="page">
 	<div class="card">
 		<h1>Tell us your taste</h1>
@@ -91,7 +90,6 @@
 		font-family: Arial, sans-serif;
 		background: #ff0000;
 	}
-
 	.page {
 		min-height: 100vh;
 		display: flex;
