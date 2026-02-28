@@ -1,4 +1,5 @@
 <script lang="ts">
+	
 	type Food = {
 		id?: number;
 		name?: string;

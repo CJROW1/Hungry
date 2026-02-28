@@ -1,23 +1,25 @@
 <script>
 	import { goto } from '$app/navigation';
 
-	let mood = $state('');
-	let budget = $state('');
-	let groupSize = $state('');
-	let minRating = $state('');
-	let dietary = $state('');
+	let answers = {
+		mood: '',
+		budget: '',
+		group: '',
+		rating: '',
+		dietary: ''
+	};
 
-	function submitPreferences() {
-		const params = new URLSearchParams({
-			mood,
-			budget,
-			groupSize,
-			minRating,
-			dietary
-		});
-
-		goto(`/results?${params.toString()}`);
+	function submitQuiz() {
+		console.log('answers:', answers);
+		goto('/result');
 	}
+
+	$: isComplete =
+		answers.mood &&
+		answers.budget &&
+		answers.group &&
+		answers.rating &&
+		answers.dietary;
 </script>
 
 <div class="page">
@@ -33,7 +35,7 @@
 			<div class="form">
 				<label>
 					<span>Q1. What are you in the mood for right now?</span>
-					<select bind:value={mood}>
+					<select bind:value={answers.mood}>
 						<option value="">Select one</option>
 						<option value="Something filling">Something filling</option>
 						<option value="Something quick">Something quick</option>
@@ -45,7 +47,7 @@
 
 				<label>
 					<span>Q2. How much do you want to spend?</span>
-					<select bind:value={budget}>
+					<select bind:value={answers.budget}>
 						<option value="">Select one</option>
 						<option value="Budget-friendly">Budget-friendly</option>
 						<option value="Medium price">Medium price</option>
@@ -55,7 +57,7 @@
 
 				<label>
 					<span>Q3. Who are you eating with?</span>
-					<select bind:value={groupSize}>
+					<select bind:value={answers.group}>
 						<option value="">Select one</option>
 						<option value="Just me">Just me</option>
 						<option value="Me and one other person">Me and one other person</option>
@@ -65,7 +67,7 @@
 
 				<label>
 					<span>Q4. What minimum rating do you want?</span>
-					<select bind:value={minRating}>
+					<select bind:value={answers.rating}>
 						<option value="">Select one</option>
 						<option value="3.5+">3.5+</option>
 						<option value="4.0+">4.0+</option>
@@ -76,17 +78,14 @@
 
 				<label>
 					<span>Q5. Any dietary preference?</span>
-					<select bind:value={dietary}>
+					<select bind:value={answers.dietary}>
 						<option value="">Select one</option>
 						<option value="Halal">Halal</option>
 						<option value="No preference">No preference</option>
 					</select>
 				</label>
 
-				<button
-					onclick={submitPreferences}
-					disabled={!mood || !budget || !groupSize || !minRating || !dietary}
-				>
+				<button on:click={submitQuiz} disabled={!isComplete}>
 					Show my matches
 				</button>
 			</div>
@@ -119,7 +118,7 @@
 
 	.topbar h1 {
 		margin: 0;
-		font-family: 'League Spartan', Arial, sans-serif;
+		font-family: Arial, sans-serif;
 		font-size: clamp(3rem, 5vw, 4.5rem);
 		font-weight: 800;
 		color: #ff1a1a;
