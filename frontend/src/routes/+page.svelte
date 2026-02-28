@@ -1,8 +1,34 @@
 <script>
     import {onMount} from "svelte";
 
-    let number = $state(1);
-    let test_call = $state("");
+    let formData = $state({
+        username: "",
+        age: ""
+    })
+
+    function cleanNumInput(e) {
+        const cleanedNum = e.currentTarget.value.replace(/\D/g, '');
+        formData.age = cleanedNum;
+        e.currentTarget.value = cleanedNum;
+    }
+
+    async function handleInput() {
+        fetch("http://localhost:8000/greeting", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                name: formData.username,
+                age: Number(formData.age),
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            user = data.message;
+        })
+    }
+
     let user = $state("")
 
     onMount(async () =>
@@ -19,13 +45,18 @@
         .then(response => response.json())
         .then(data => {
             user = data.message;
-            console.log("state below this");
-            console.log($state.snapshot(test_call));
         })
     )
 </script>
 
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
-<p>Testing API call {number}</p>
 <p>Testing API call: {user}</p>
+<form>
+    <input 
+        id="email" type="text" 
+        bind:value={formData.username} placeholder="Enter name"
+    />
+    <input id="age" type="text" 
+    oninput={cleanNumInput}
+    inputmode="numeric" bind:value={formData.age} placeholder="Enter age" maxlength="3"/>
+    <button onclick={handleInput} type="submit">Submit</button>
+</form>
