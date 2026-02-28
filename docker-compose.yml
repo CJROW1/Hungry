@@ -9,38 +9,39 @@ services:
       - backend
     volumes:
       - ./frontend:/app
-
   backend:
     build:
       context: .
       dockerfile: Dockerfile.backend
     ports:
       - "8000:8000"
-    environment:
-      DATABASE_URL: postgresql://app:app@postgres:5432/FoodFinder
-      REDIS_URL: redis://redis:6379/0
-    depends_on:
-      - postgres
-      - redis
-
-  postgres:
-    image: postgres:17-alpine
-    environment:
-      POSTGRES_USER: app
-      POSTGRES_PASSWORD: app
-      POSTGRES_DB: app
-    ports:
-      - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ./backend:/app
+    # environment:
+    #   DATABASE_URL: postgresql://app:app@postgres:5432/FoodFinder
+    #   REDIS_URL: redis://redis:6379/0
+    # depends_on:
+    #   - postgres
+    #   - redis
 
-  redis:
-    image: redis:latest
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
+  # postgres:
+  #   image: postgres:17-alpine
+  #   environment:
+  #     POSTGRES_USER: app
+  #     POSTGRES_PASSWORD: app
+  #     POSTGRES_DB: app
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
 
-volumes:
-  postgres_data:
-  redis_data:
+  # redis:
+  #   image: redis:latest
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis_data:/data
+
+# volumes:
+#   postgres_data:
+#   redis_data:

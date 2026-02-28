@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from typing import TypedDict
+from pydantic import BaseModel
 
 app = FastAPI()
 
@@ -15,3 +17,18 @@ app.add_middleware(
 @app.get("/")
 def home():
     return {"message": "Backend is reachable!"}
+
+class GreetingRequest(BaseModel):
+    name: str
+    age: int
+
+    
+class GreetingResponse(BaseModel):
+    message: str
+
+@app.post("/greeting")
+def greeting(request:GreetingRequest) -> GreetingResponse:
+    return GreetingResponse(
+        message = f"Hello {request.name} You are {request.age}"
+    )
+    
