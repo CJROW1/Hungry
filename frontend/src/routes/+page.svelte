@@ -1,7 +1,6 @@
 <script>
-    import {onMount} from "svelte";
-    import Qna from "$lib/components/qna.svelte";
-    import Result from "$lib/components/result.svelte";
+    // import Qna from "$lib/components/qna.svelte";
+    // import Result from "$lib/components/result.svelte";
 
 
     // function cleanNumInput(e) {
@@ -10,14 +9,21 @@
     //     e.currentTarget.value = cleanedNum;
     // }
 
-    let foods = $state("");
+    let foods = $state();
 
-    async function testSearchAPI() {
-        fetch("http://localhost:8000/api/search?q=sushi", {
-            method: "GET",
+    async function testRecommendationAPI() {
+        fetch("http://localhost:8000/api/recommendations", {
+            method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
+            body: JSON.stringify({
+                "category": "Pizza",
+                "vibe": "Student Staple",
+                "max_price": 100,
+                "min_rating": 0,
+                "dietary": "",
+            })
         })
         .then(response => response.json())
         .then(data => {
@@ -39,10 +45,10 @@
 <!--     <button onclick={handleInput} type="submit">Submit</button> -->
 <!-- </form> -->
 
-<button onclick={testSearchAPI}>Test Search API (query: sushi)</button>
+<button onclick={testRecommendationAPI}>Test Search API (query: sushi)</button>
 {#each foods as food}
     <p>{food.name}</p>
 {/each}
 
-<Qna />
-<Result />
+<!-- <Qna /> -->
+<!-- <Result /> -->
