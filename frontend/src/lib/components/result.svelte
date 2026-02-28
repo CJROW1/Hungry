@@ -172,7 +172,7 @@ const imageKeywords = {
 	:global(body) {
 		margin: 0;
 		font-family: 'Inter', sans-serif;
-		background: #ff0000;
+		background: #f97296;
 	}
 .photo-card img {
         background: #232323; /* Dark placeholder */
@@ -191,7 +191,7 @@ const imageKeywords = {
     }
 	.page {
 		min-height: 100vh;
-		background: #ff0000;
+		background: #f97296;
 		display: flex;
 		flex-direction: column;
 	}

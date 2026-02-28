@@ -7,7 +7,8 @@
 </script>
 
 <div class="page">
-    <img src="/src/lib/assets/cupid.png" alt="" class="decor cupid" />
+    <img src="/src/lib/assets/star.png" alt="" class="decor star" />
+    <img src="/src/lib/assets/cookie.png" alt="" class="decor cookies sticker" />
 	<img src="/src/lib/assets/tomato.png" alt="" class="decor tomato sticker" />
 	<img src="/src/lib/assets/heart_toast.png" alt="" class="decor toast sticker" />
 	<img src="/src/lib/assets/cookie.png" alt="" class="decor cookies sticker" />
@@ -18,15 +19,11 @@
 
 	<div class="card">
 		<div class="character-wrap">
-			<img
-				class="character"
-				src="/character.png"
-				alt="Food mascot character"
-			/>
+			<img class="character" src="/src/lib/assets/character.png" alt="Food mascot character sticker"/>
 		</div>
 
 		<div class="text-content">
-			<p class="small">Hey foodie 🍟</p>
+			<p class="small">Hey foodie,</p>
 			<h2>Let’s find your perfect food match.</h2>
 			<p class="description">
 				We’ll start with a short Q&amp;A to learn your taste in food.
@@ -40,7 +37,6 @@
 
 <style>
 	:global(body) {
-		margin: 0;
 		font-family: Arial, sans-serif;
 		background: #f97296;
 	}
@@ -60,6 +56,7 @@
 		align-items: center;
 		padding: 0 32px;
 		box-sizing: border-box;
+        z-index: 8;
 	}
 
 	.topbar h1 {
@@ -92,7 +89,7 @@
 	}
 
 	.character {
-		width: min(380px, 100%);
+		width: min(400px, 100%);
 		height: auto;
 		object-fit: contain;
 	}
@@ -100,10 +97,12 @@
 	.text-content {
 		flex: 1;
 		color: white;
+        z-index: 10;
 	}
 
 	.small {
-		font-size: 1.1rem;
+		font-size: 1.6rem;
+        font-family: 'Times New Roman', Times, serif;
 		margin: 0 0 12px 0;
 		opacity: 0.95;
 	}
@@ -129,6 +128,8 @@
         line-height: 1.6;
         max-width: 520px;
         margin-bottom: 28px;
+        backdrop-filter: blur(6px);
+	    -webkit-backdrop-filter: blur(6px);
     }
 
 	button {
@@ -162,10 +163,13 @@
 		drop-shadow(0 6px 10px rgba(0,0,0,0.18));
 }
 
-    .cupid {
-	left: 140px;
-	top: 260px;
-	width: 250px;
+    .star{
+        position: absolute;
+        left: -80px;
+        pointer-events: none;
+        z-index: -7;
+        opacity: 0.80;
+        filter: blur(4px);
     }
 
     .tomato {
