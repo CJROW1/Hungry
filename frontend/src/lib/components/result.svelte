@@ -1,103 +1,424 @@
 <script lang="ts">
-	import { page } from '$app/state';
-	import Result from '$lib/components/result.svelte';
-
-	type Preferences = {
-		category: string;
-		vibe: string;
-		maxPrice: number;
-		minRating: number;
-		dietary: string;
+	type Food = {
+		id?: number;
+		name?: string;
+		title?: string;
+		image?: string;
+		url?: string;
 	};
 
-	type Deal = {
-		id: number;
-		restaurant: string;
-		title: string;
-		image: string;
-		url: string;
-	};
+	let {
+		foods = [],
+		cupidImage = '/cupid.png'
+	}: {
+		foods?: Food[];
+		cupidImage?: string;
+	} = $props();
 
-	let deals = $state<Deal[]>([]);
 	let currentIndex = $state(0);
-	let loading = $state(true);
-	let error = $state('');
 
-	let preferences = $derived<Preferences>({
-		category: page.url.searchParams.get('category') ?? '',
-		vibe: page.url.searchParams.get('vibe') ?? '',
-		maxPrice: Number(page.url.searchParams.get('maxPrice') ?? 25),
-		minRating: Number(page.url.searchParams.get('minRating') ?? 4),
-		dietary: page.url.searchParams.get('dietary') ?? 'None'
-	});
+	let currentFood = $derived(foods[currentIndex] ?? null);
 
-	let currentDeal = $derived(deals[currentIndex] ?? null);
-
-	$effect(() => {
-		loadDeals();
-	});
-
-	async function loadDeals() {
-		loading = true;
-		error = '';
-
-		try {
-			const response = await fetch('http://localhost:8000/search', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(preferences)
-			});
-
-			if (!response.ok) {
-				throw new Error('Failed to load deals');
-			}
-
-			const data = await response.json();
-			deals = data.deals ?? [];
-			currentIndex = 0;
-		} catch (err) {
-			error = err instanceof Error ? err.message : 'Something went wrong';
-			deals = [];
-		} finally {
-			loading = false;
+	function nextDeal() {
+		if (currentIndex < foods.length - 1) {
+			currentIndex += 1;
 		}
 	}
 
-	function nextDeal() {
-		currentIndex += 1;
-	}
-
-	function takeDeal(deal: Deal) {
-		window.open(deal.url, '_blank');
+	function takeDeal() {
+		if (currentFood?.url) {
+			window.open(currentFood.url, '_blank');
+		}
 	}
 
 	function dismiss() {
-		window.history.back();
+		console.log('dismiss result');
 	}
 </script>
 
-{#if loading}
-	<div class="state">Loading deals...</div>
-{:else if error}
-	<div class="state">Error: {error}</div>
-{:else}
-	<Result
-		deal={currentDeal}
-		onNext={nextDeal}
-		onTake={takeDeal}
-		onDismiss={dismiss}
+<svelte:head>
+	<title>Hungry | Result</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+	<link
+		href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@600;700;800&family=Inter:ital,wght@0,400;0,500;0,600;1,600;1,700&display=swap"
+		rel="stylesheet"
 	/>
-{/if}
+</svelte:head>
+
+<div class="page">
+	<header class="topbar">
+		<h1>Hungry</h1>
+	</header>
+
+	<section class="hero">
+		<div class="spark spark-1"></div>
+		<div class="spark spark-2"></div>
+		<div class="spark spark-3"></div>
+
+		{#if currentFood}
+			<div class="content">
+				<div class="photo-wrap">
+					<div class="photo-card">
+						<img
+							src={currentFood.image || '/food-placeholder.jpg'}
+							alt={currentFood.name || 'Food deal'}
+						/>
+					</div>
+				</div>
+
+				<div class="center-copy">
+					<h2>The perfect match for you has arrived!</h2>
+
+					<p class="restaurant-name">
+						{currentFood.name || currentFood.title || 'Unnamed Deal'}
+					</p>
+
+					<div class="actions">
+						<button class="primary" onclick={takeDeal}>
+							Just right for me!
+						</button>
+
+						<button class="secondary" onclick={nextDeal}>
+							Explore other options
+						</button>
+
+						<button class="dismiss" onclick={dismiss}>
+							Dismiss
+						</button>
+					</div>
+				</div>
+
+				<div class="cupid-wrap">
+					<img src={cupidImage} alt="Cupid illustration" />
+				</div>
+			</div>
+		{:else}
+			<div class="empty-state">
+				<div class="empty-copy">
+					<h2>No deal selected yet.</h2>
+					<p>Run your search first, then the result card will appear here.</p>
+				</div>
+
+				<div class="cupid-wrap empty-cupid">
+					<img src={cupidImage} alt="Cupid illustration" />
+				</div>
+			</div>
+		{/if}
+	</section>
+
+	<footer class="bottombar"></footer>
+</div>
 
 <style>
-	.state {
+	:global(body) {
+		margin: 0;
+		font-family: 'Inter', sans-serif;
+		background: #ff0000;
+	}
+
+	.page {
 		min-height: 100vh;
+		background: #ff0000;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.topbar,
+	.bottombar {
+		background: #232323;
+		flex-shrink: 0;
+	}
+
+	.topbar {
+		height: 110px;
 		display: flex;
 		align-items: center;
-		justify-content: center;
+		padding: 0 32px;
+	}
+
+	.bottombar {
+		height: 70px;
+		margin-top: auto;
+	}
+
+	.topbar h1 {
+		margin: 0;
+		font-family: 'League Spartan', sans-serif;
+		font-size: clamp(3rem, 5vw, 4.5rem);
+		font-weight: 800;
+		color: #ff1a1a;
+		line-height: 1;
+	}
+
+	.hero {
+		position: relative;
+		flex: 1;
 		background: #ff0000;
+		overflow: hidden;
+		padding: 40px 32px;
+	}
+
+	.content {
+		position: relative;
+		z-index: 2;
+		max-width: 1400px;
+		margin: 0 auto;
+		min-height: 640px;
+		display: grid;
+		grid-template-columns: 1.05fr 1fr 0.8fr;
+		align-items: center;
+		gap: 24px;
+	}
+
+	.photo-wrap {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.photo-card {
+		width: min(420px, 80vw);
+		background: #fff;
+		padding: 18px;
+		border-radius: 24px;
+		transform: rotate(-11deg);
+		box-shadow: 0 24px 40px rgba(0, 0, 0, 0.22);
+	}
+
+	.photo-card img {
+		display: block;
+		width: 100%;
+		aspect-ratio: 1 / 1;
+		object-fit: cover;
+		border-radius: 16px;
+	}
+
+	.center-copy {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		justify-content: center;
+		max-width: 520px;
+	}
+
+	h2 {
+		margin: 0 0 20px;
 		color: white;
-		font-size: 2rem;
+		font-size: clamp(2.2rem, 4vw, 4rem);
 		font-style: italic;
+		font-weight: 700;
+		line-height: 1.1;
+		max-width: 12ch;
+	}
+
+	.restaurant-name {
+		margin: 0 0 28px;
+		color: white;
+		font-size: 1.1rem;
+		font-weight: 600;
+		opacity: 0.95;
+	}
+
+	.actions {
+		display: flex;
+		flex-direction: column;
+		align-items: stretch;
+		gap: 24px;
+		width: min(430px, 100%);
+	}
+
+	.primary,
+	.secondary {
+		border: none;
+		background: #000;
+		color: white;
+		border-radius: 999px;
+		padding: 22px 28px;
+		font-size: 1.05rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition:
+			transform 0.15s ease,
+			opacity 0.15s ease;
+	}
+
+	.primary:hover,
+	.secondary:hover {
+		transform: translateY(-2px);
+	}
+
+	.dismiss {
+		border: none;
+		background: transparent;
+		color: white;
+		font-size: 0.95rem;
+		cursor: pointer;
+		padding: 6px 0 0;
+		align-self: center;
+		opacity: 0.95;
+	}
+
+	.dismiss:hover {
+		text-decoration: underline;
+	}
+
+	.cupid-wrap {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.cupid-wrap img {
+		width: min(330px, 100%);
+		height: auto;
+		object-fit: contain;
+	}
+
+	.empty-state {
+		position: relative;
+		z-index: 2;
+		max-width: 1200px;
+		min-height: 640px;
+		margin: 0 auto;
+		display: grid;
+		grid-template-columns: 1fr 0.8fr;
+		align-items: center;
+		gap: 24px;
+	}
+
+	.empty-copy {
+		color: white;
+	}
+
+	.empty-copy p {
+		margin: 0;
+		font-size: 1.1rem;
+		line-height: 1.6;
+		max-width: 34ch;
+	}
+
+	.empty-cupid {
+		justify-content: center;
+	}
+
+	.spark {
+		position: absolute;
+		background: radial-gradient(
+			circle,
+			rgba(255, 215, 245, 0.95) 0%,
+			rgba(255, 215, 245, 0.55) 25%,
+			rgba(255, 215, 245, 0) 70%
+		);
+		filter: blur(3px);
+		opacity: 0.95;
+		z-index: 1;
+		clip-path: polygon(
+			50% 0%,
+			60% 33%,
+			100% 50%,
+			60% 67%,
+			50% 100%,
+			40% 67%,
+			0% 50%,
+			40% 33%
+		);
+	}
+
+	.spark-1 {
+		width: 300px;
+		height: 300px;
+		left: 260px;
+		bottom: 70px;
+		transform: rotate(18deg);
+	}
+
+	.spark-2 {
+		width: 210px;
+		height: 210px;
+		left: 540px;
+		top: 30px;
+		transform: rotate(-12deg);
+	}
+
+	.spark-3 {
+		width: 180px;
+		height: 180px;
+		left: 530px;
+		top: 200px;
+		transform: rotate(20deg);
+	}
+
+	@media (max-width: 1100px) {
+		.content,
+		.empty-state {
+			grid-template-columns: 1fr;
+			justify-items: center;
+			text-align: center;
+			gap: 30px;
+			padding: 20px 0 40px;
+		}
+
+		.center-copy {
+			align-items: center;
+		}
+
+		h2 {
+			max-width: 14ch;
+		}
+
+		.actions {
+			width: min(430px, 90vw);
+		}
+
+		.spark-1 {
+			left: 40px;
+			bottom: 120px;
+		}
+
+		.spark-2 {
+			right: 80px;
+			left: auto;
+			top: 60px;
+		}
+
+		.spark-3 {
+			left: 50%;
+			top: 280px;
+			transform: translateX(-50%);
+		}
+	}
+
+	@media (max-width: 700px) {
+		.topbar {
+			height: 88px;
+			padding: 0 20px;
+		}
+
+		.hero {
+			padding: 24px 20px 32px;
+		}
+
+		.photo-card {
+			width: min(320px, 82vw);
+			padding: 14px;
+			border-radius: 20px;
+		}
+
+		.primary,
+		.secondary {
+			padding: 18px 20px;
+			font-size: 1rem;
+		}
+
+		.cupid-wrap img {
+			width: min(220px, 60vw);
+		}
+
+		.spark-1,
+		.spark-2,
+		.spark-3 {
+			opacity: 0.65;
+		}
 	}
 </style>
