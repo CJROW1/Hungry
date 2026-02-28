@@ -1,6 +1,6 @@
 <script>
-    // import Qna from "$lib/components/qna.svelte";
-    // import Result from "$lib/components/result.svelte";
+    import Qna from "$lib/components/qna.svelte";
+    import Result from "$lib/components/result.svelte";
 
 
     // function cleanNumInput(e) {
@@ -50,5 +50,5 @@
     <p>{food.name}</p>
 {/each}
 
-<!-- <Qna /> -->
-<!-- <Result /> -->
+<Qna />
+<Result />
