@@ -11,7 +11,7 @@
 
 	let {
 		foods = [],
-		cupidImage = '/cupid.png'
+		cupidImage = '/src/lib/assets/character.png'
 	}: {
 		foods?: Food[];
 		cupidImage?: string;
