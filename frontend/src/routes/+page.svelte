@@ -1,6 +1,7 @@
 <script>
     import {onMount} from "svelte";
-    import Lam from "./lam.svelte";
+    import Qna from "$lib/components/qna.svelte";
+    import Result from "$lib/components/result.svelte";
 
     let formData = $state({
         username: "",
@@ -63,4 +64,3 @@
     inputmode="numeric" bind:value={formData.age} placeholder="Enter age" maxlength="3"/>
     <button onclick={handleInput} type="submit">Submit</button>
 </form>
-<Lam />
