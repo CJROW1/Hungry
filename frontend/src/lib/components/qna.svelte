@@ -1,167 +1,95 @@
-<<<<<<< HEAD
 <script>
-	let answers = {
-		mood: '',
-		budget: '',
-		group: '',
-		rating: '',
-		dietary: ''
-	};
-
-	const questions = [
-		{
-			id: 'mood',
-			text: 'Q1. What are you in the mood for right now?',
-			options: [
-				'Something filling',
-				'Something quick',
-				'Something comforting',
-				'Something fun with friends',
-				'Breakfast/brunch food'
-			]
-		},
-		{
-			id: 'budget',
-			text: 'Q2. How much do you want to spend?',
-			options: ['Budget-friendly', 'Medium price', 'Don’t care']
-		},
-		{
-			id: 'group',
-			text: 'Q3. Who are you eating with?',
-			options: ['Just me', 'Me and one other person', 'A group']
-		},
-		{
-			id: 'rating',
-			text: 'Q4. What minimum rating do you want?',
-			options: ['3.5+', '4.0+', '4.5+', 'Don’t care']
-		},
-		{
-			id: 'dietary',
-			text: 'Q5. Any dietary preference?',
-			options: ['Halal', 'No preference']
-		}
-	];
-
-	$: isComplete =
-		answers.mood &&
-		answers.budget &&
-		answers.group &&
-		answers.rating &&
-		answers.dietary;
-
-	function submitQuiz() {
-		console.log(answers);
-=======
-<script lang="ts">
 	import { goto } from '$app/navigation';
 
-	let category = $state('');
-	let vibe = $state('');
-	let maxPrice = $state(25);
-	let minRating = $state(4);
-	let dietary = $state('None');
+	let mood = $state('');
+	let budget = $state('');
+	let groupSize = $state('');
+	let minRating = $state('');
+	let dietary = $state('');
 
 	function submitPreferences() {
 		const params = new URLSearchParams({
-			category,
-			vibe,
-			maxPrice: String(maxPrice),
-			minRating: String(minRating),
+			mood,
+			budget,
+			groupSize,
+			minRating,
 			dietary
 		});
 
 		goto(`/results?${params.toString()}`);
->>>>>>> e66039920544846ead31ece5bdb6acfad5add47d
 	}
 </script>
 
 <div class="page">
-<<<<<<< HEAD
-	<h1>Tell us your taste ✨</h1>
+	<header class="topbar">
+		<h1>Hungry</h1>
+	</header>
 
-	{#each questions as question}
-		<section>
-			<h2>{question.text}</h2>
+	<div class="content">
+		<div class="card">
+			<h2>Tell us your taste</h2>
+			<p class="subtitle">Answer a few quick questions so we can find your best match.</p>
 
-			{#each question.options as option}
+			<div class="form">
 				<label>
-					<input
-						type="radio"
-						name={question.id}
-						value={option}
-						bind:group={answers[question.id]}
-					/>
-					{option}
+					<span>Q1. What are you in the mood for right now?</span>
+					<select bind:value={mood}>
+						<option value="">Select one</option>
+						<option value="Something filling">Something filling</option>
+						<option value="Something quick">Something quick</option>
+						<option value="Something comforting">Something comforting</option>
+						<option value="Something fun with friends">Something fun with friends</option>
+						<option value="Breakfast/brunch food">Breakfast/brunch food</option>
+					</select>
 				</label>
-			{/each}
-		</section>
-	{/each}
 
-	<button on:click={submitQuiz} disabled={!isComplete}>
-		See My Matches
-	</button>
-</div>
-=======
-	<div class="card">
-		<h1>Tell us your taste</h1>
-		<p class="subtitle">Answer a few quick questions so we can find your best match.</p>
+				<label>
+					<span>Q2. How much do you want to spend?</span>
+					<select bind:value={budget}>
+						<option value="">Select one</option>
+						<option value="Budget-friendly">Budget-friendly</option>
+						<option value="Medium price">Medium price</option>
+						<option value="Don’t care">Don’t care</option>
+					</select>
+				</label>
 
-		<div class="form">
-			<label>
-				<span>Category</span>
-				<select bind:value={category}>
-					<option value="">Select a category</option>
-					<option value="Sushi">Sushi</option>
-					<option value="Burgers">Burgers</option>
-					<option value="Pizza">Pizza</option>
-					<option value="Korean">Korean</option>
-					<option value="Indian">Indian</option>
-					<option value="Healthy">Healthy</option>
-					<option value="Dessert">Dessert</option>
-				</select>
-			</label>
+				<label>
+					<span>Q3. Who are you eating with?</span>
+					<select bind:value={groupSize}>
+						<option value="">Select one</option>
+						<option value="Just me">Just me</option>
+						<option value="Me and one other person">Me and one other person</option>
+						<option value="A group">A group</option>
+					</select>
+				</label>
 
-			<label>
-				<span>Vibe</span>
-				<select bind:value={vibe}>
-					<option value="">Select a vibe</option>
-					<option value="Small and cozy">Small and cozy</option>
-					<option value="Big portions">Big portions</option>
-					<option value="Fancy">Fancy</option>
-					<option value="Comfort food">Comfort food</option>
-					<option value="Fast and simple">Fast and simple</option>
-				</select>
-			</label>
+				<label>
+					<span>Q4. What minimum rating do you want?</span>
+					<select bind:value={minRating}>
+						<option value="">Select one</option>
+						<option value="3.5+">3.5+</option>
+						<option value="4.0+">4.0+</option>
+						<option value="4.5+">4.5+</option>
+						<option value="Don’t care">Don’t care</option>
+					</select>
+				</label>
 
-			<label>
-				<span>Max Price ($)</span>
-				<input type="number" min="1" bind:value={maxPrice} />
-			</label>
+				<label>
+					<span>Q5. Any dietary preference?</span>
+					<select bind:value={dietary}>
+						<option value="">Select one</option>
+						<option value="Halal">Halal</option>
+						<option value="No preference">No preference</option>
+					</select>
+				</label>
 
-			<label>
-				<span>Minimum Rating</span>
-				<input type="number" min="0" max="5" step="0.1" bind:value={minRating} />
-			</label>
-
-			<label>
-				<span>Dietary</span>
-				<select bind:value={dietary}>
-					<option value="None">None</option>
-					<option value="Vegetarian">Vegetarian</option>
-					<option value="Vegan">Vegan</option>
-					<option value="Halal">Halal</option>
-					<option value="Gluten-free">Gluten-free</option>
-					<option value="Dairy-free">Dairy-free</option>
-				</select>
-			</label>
-
-			<button
-				class="submit"
-				onclick={submitPreferences}
-				disabled={!category || !vibe}
-			>
-				Show my matches
-			</button>
+				<button
+					onclick={submitPreferences}
+					disabled={!mood || !budget || !groupSize || !minRating || !dietary}
+				>
+					Show my matches
+				</button>
+			</div>
 		</div>
 	</div>
 </div>
@@ -176,6 +104,31 @@
 	.page {
 		min-height: 100vh;
 		display: flex;
+		flex-direction: column;
+		background: #ff0000;
+	}
+
+	.topbar {
+		height: 110px;
+		background: #232323;
+		display: flex;
+		align-items: center;
+		padding: 0 32px;
+		box-sizing: border-box;
+	}
+
+	.topbar h1 {
+		margin: 0;
+		font-family: 'League Spartan', Arial, sans-serif;
+		font-size: clamp(3rem, 5vw, 4.5rem);
+		font-weight: 800;
+		color: #ff1a1a;
+		line-height: 1;
+	}
+
+	.content {
+		flex: 1;
+		display: flex;
 		align-items: center;
 		justify-content: center;
 		padding: 24px;
@@ -183,7 +136,7 @@
 	}
 
 	.card {
-		width: min(720px, 100%);
+		width: min(760px, 100%);
 		background: #ff1a1a;
 		border-radius: 32px;
 		padding: 40px 32px;
@@ -192,7 +145,7 @@
 		box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
 	}
 
-	h1 {
+	h2 {
 		margin: 0 0 10px;
 		font-size: clamp(2rem, 4vw, 3.5rem);
 		font-style: italic;
@@ -217,10 +170,10 @@
 
 	span {
 		font-weight: 700;
+		line-height: 1.4;
 	}
 
-	select,
-	input {
+	select {
 		border: none;
 		border-radius: 16px;
 		padding: 14px 16px;
@@ -229,7 +182,7 @@
 		color: #111;
 	}
 
-	.submit {
+	button {
 		margin-top: 10px;
 		border: none;
 		background: #1f1f1f;
@@ -240,9 +193,23 @@
 		cursor: pointer;
 	}
 
-	.submit:disabled {
+	button:disabled {
 		opacity: 0.6;
 		cursor: not-allowed;
 	}
+
+	@media (max-width: 850px) {
+		.topbar {
+			height: 88px;
+			padding: 0 20px;
+		}
+
+		.content {
+			padding: 20px;
+		}
+
+		.card {
+			padding: 32px 24px;
+		}
+	}
 </style>
->>>>>>> e66039920544846ead31ece5bdb6acfad5add47d

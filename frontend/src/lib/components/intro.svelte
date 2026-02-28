@@ -6,9 +6,11 @@
 	}
 </script>
 
-
-
 <div class="page">
+	<header class="topbar">
+		<h1>Hungry</h1>
+	</header>
+
 	<div class="card">
 		<div class="character-wrap">
 			<img
@@ -20,7 +22,7 @@
 
 		<div class="text-content">
 			<p class="small">Hey foodie 🍟</p>
-			<h1>Let’s find your perfect food match.</h1>
+			<h2>Let’s find your perfect food match.</h2>
 			<p class="description">
 				We’ll start with a short Q&amp;A to learn your taste in food.
 				Think of it like a dating app... but for your next meal.
@@ -41,20 +43,36 @@
 	.page {
 		min-height: 100vh;
 		display: flex;
+		flex-direction: column;
+	}
+
+	.topbar {
+		height: 110px;
+		background: #232323;
+		display: flex;
 		align-items: center;
-		justify-content: center;
-		padding: 24px;
+		padding: 0 32px;
+		box-sizing: border-box;
+	}
+
+	.topbar h1 {
+		margin: 0;
+		font-family: 'League Spartan', Arial, sans-serif;
+		font-size: clamp(3rem, 5vw, 4.5rem);
+		font-weight: 800;
+		color: #ff1a1a;
+		line-height: 1;
 	}
 
 	.card {
 		width: min(1100px, 100%);
-		min-height: 80vh;
-		border-radius: 32px;
+		min-height: calc(100vh - 110px);
+		margin: 0 auto;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		gap: 32px;
-		padding: 48px;
+		padding: 48px 24px;
 		box-sizing: border-box;
 		overflow: hidden;
 	}
@@ -83,11 +101,12 @@
 		opacity: 0.95;
 	}
 
-	h1 {
+	h2 {
 		font-size: clamp(2.2rem, 5vw, 4.5rem);
 		line-height: 1.05;
 		margin: 0 0 20px 0;
 		font-style: italic;
+		color: white;
 	}
 
 	.description {
@@ -113,7 +132,13 @@
 	}
 
 	@media (max-width: 850px) {
+		.topbar {
+			height: 88px;
+			padding: 0 20px;
+		}
+
 		.card {
+			min-height: calc(100vh - 88px);
 			flex-direction: column;
 			text-align: center;
 			padding: 32px 24px;
