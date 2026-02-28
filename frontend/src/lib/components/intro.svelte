@@ -8,9 +8,9 @@
 
 <div class="page">
     <img src="/src/lib/assets/cupid.png" alt="" class="decor cupid" />
-	<img src="/src/lib/assets/tomato.png" alt="" class="decor tomato" />
-	<img src="/src/lib/assets/heart_toast.png" alt="" class="decor toast" />
-	<img src="/src/lib/assets/cookie.png" alt="" class="decor cookies" />
+	<img src="/src/lib/assets/tomato.png" alt="" class="decor tomato sticker" />
+	<img src="/src/lib/assets/heart_toast.png" alt="" class="decor toast sticker" />
+	<img src="/src/lib/assets/cookie.png" alt="" class="decor cookies sticker" />
 
 	<header class="topbar">
 		<h1>Hungry</h1>
@@ -108,6 +108,7 @@
 		opacity: 0.95;
 	}
 
+
 	h2 {
 		font-size: clamp(2.2rem, 5vw, 4.5rem);
 		line-height: 1.05;
@@ -116,12 +117,19 @@
 		color: white;
 	}
 
-	.description {
-		font-size: 1.1rem;
-		line-height: 1.6;
-		max-width: 520px;
-		margin-bottom: 28px;
-	}
+    .description {
+	    position: relative;
+	    z-index: 10;
+	    display: inline-block;
+	    background: rgba(255, 255, 255, 0.12);
+	    border: 2px solid white;
+	    border-radius: 20px;
+	    padding: 18px 22px;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        max-width: 520px;
+        margin-bottom: 28px;
+    }
 
 	button {
 		border: none;
@@ -143,6 +151,15 @@
 	pointer-events: none;
 	object-fit: contain;
 	z-index: 2;
+    }
+
+    .sticker {
+	filter:
+		drop-shadow(2px 0 0 white)
+		drop-shadow(-2px 0 0 white)
+		drop-shadow(0 2px 0 white)
+		drop-shadow(0 -2px 0 white)
+		drop-shadow(0 6px 10px rgba(0,0,0,0.18));
 }
 
     .cupid {
@@ -154,19 +171,23 @@
     .tomato {
 	right: 110px;
 	top: 110px;
-	width: 140px;
+	width: 10%;
+    transform: rotate(12deg);
     }
 
     .toast {
-	left: 10px;
-	bottom: -10px;
-	width: 290px;
+	left: -90px;
+	bottom: -70px;
+	width: 30%;
+    transform: rotate(-30deg);
     }
 
     .cookies {
 	right: 20px;
 	bottom: 20px;
-	width: 250px;
+	width: 20%;
+    position: absolute;
+	z-index: 2;
     }
 
 	@media (max-width: 850px) {
