@@ -128,14 +128,14 @@ async function submitQuiz() {
 	:global(body) {
 		margin: 0;
 		font-family: Arial, sans-serif;
-		background: #ff0000;
+		background: #f97296;
 	}
 
 	.page {
 		min-height: 100vh;
 		display: flex;
 		flex-direction: column;
-		background: #ff0000;
+		background: #f97296;
 	}
 
 	.topbar {
@@ -149,7 +149,7 @@ async function submitQuiz() {
 
 	.topbar h1 {
 		margin: 0;
-		font-family: Arial, sans-serif;
+		font-family: 'League Spartan', Arial, sans-serif;
 		font-size: clamp(3rem, 5vw, 4.5rem);
 		font-weight: 800;
 		color: #ff1a1a;

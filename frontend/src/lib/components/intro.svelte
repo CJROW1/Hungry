@@ -7,6 +7,11 @@
 </script>
 
 <div class="page">
+    <img src="/src/lib/assets/cupid.png" alt="" class="decor cupid" />
+	<img src="/src/lib/assets/tomato.png" alt="" class="decor tomato" />
+	<img src="/src/lib/assets/heart_toast.png" alt="" class="decor toast" />
+	<img src="/src/lib/assets/cookie.png" alt="" class="decor cookies" />
+
 	<header class="topbar">
 		<h1>Hungry</h1>
 	</header>
@@ -37,13 +42,15 @@
 	:global(body) {
 		margin: 0;
 		font-family: Arial, sans-serif;
-		background: #ff0000;
+		background: #f97296;
 	}
 
 	.page {
 		min-height: 100vh;
 		display: flex;
 		flex-direction: column;
+	    position: relative;
+	    overflow: hidden;
 	}
 
 	.topbar {
@@ -130,6 +137,37 @@
 	button:hover {
 		transform: translateY(-2px);
 	}
+
+    .decor {
+	position: absolute;
+	pointer-events: none;
+	object-fit: contain;
+	z-index: 2;
+}
+
+    .cupid {
+	left: 140px;
+	top: 260px;
+	width: 250px;
+    }
+
+    .tomato {
+	right: 110px;
+	top: 110px;
+	width: 140px;
+    }
+
+    .toast {
+	left: 10px;
+	bottom: -10px;
+	width: 290px;
+    }
+
+    .cookies {
+	right: 20px;
+	bottom: 20px;
+	width: 250px;
+    }
 
 	@media (max-width: 850px) {
 		.topbar {
