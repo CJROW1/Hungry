@@ -114,6 +114,11 @@ const imageKeywords = {
 				</div>
 
 				<div class="center-copy">
+					{#if foods.length > 0}
+        				<span class="match-count">
+           					Match {currentIndex + 1} of {foods.length}
+        				</span>
+    				{/if}
 					{#if currentFood.match_percentage}
         				<div class="match-badge">
             				{currentFood.match_percentage}% MATCH
@@ -501,23 +506,14 @@ const imageKeywords = {
 			opacity: 0.65;
 		}
 	}
-	.start-over {
-        border: 2px solid white;
-        background: transparent;
+	.match-count {
         color: white;
-        border-radius: 999px;
-        padding: 22px 28px;
         font-family: 'Inter', sans-serif;
-        font-size: 1.05rem;
+        font-size: 0.85rem;
         font-weight: 600;
-        cursor: pointer;
-        transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease;
-        margin-top: 8px;
-    }
-
-    .start-over:hover {
-        background: white;
-        color: #ff0000;
-        transform: translateY(-2px);
-    }
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 8px;
+        opacity: 0.8;
+    }	
 </style>
