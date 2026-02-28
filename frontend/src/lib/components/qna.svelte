@@ -47,7 +47,6 @@
 	.card {
 		width: min(1100px, 100%);
 		min-height: 80vh;
-		background: linear-gradient(180deg, #ff2b2b 0%, #ff1a1a 100%);
 		border-radius: 32px;
 		display: flex;
 		align-items: center;
