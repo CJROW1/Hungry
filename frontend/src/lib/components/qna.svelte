@@ -9,10 +9,9 @@
         dietary: ''
     };
 
-async function submitQuiz() {
+    async function submitQuiz() {
         if (!browser) return;
 
-        // Import navigation
         const { goto } = await import('$app/navigation');
 
         const moodMap = {
@@ -32,7 +31,6 @@ async function submitQuiz() {
         };
 
         try {
-            // Using 127.0.0.1 is more stable for CORS than 'localhost'
             const response = await fetch('http://127.0.0.1:8000/api/recommendations', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -42,8 +40,7 @@ async function submitQuiz() {
             if (response.ok) {
                 const data = await response.json();
                 sessionStorage.setItem('hungryResults', JSON.stringify(data.results));
-                // Await the navigation
-                await goto('/result'); 
+                await goto('/result');
             }
         } catch (err) {
             console.error("Connection failed:", err);
@@ -57,6 +54,14 @@ async function submitQuiz() {
 	<header class="topbar">
 		<h1>Hungry</h1>
 	</header>
+
+	<!-- decorations -->
+    <img src="/src/lib/assets/cookie.png" alt="" class="decor cookies sticker" />
+	<img src="/src/lib/assets/tomato.png" alt="" class="decor tomato sticker" />
+	<img src="/src/lib/assets/heart_toast.png" alt="" class="decor toast sticker" />
+	<img src="/src/lib/assets/cookie.png" alt="" class="decor cookies sticker" />
+		<img src="/src/lib/assets/tomato.png" alt="" class="decor tomato sticker" />
+	<img src="/src/lib/assets/heart_toast.png" alt="" class="decor toast sticker" />
 
 	<div class="content">
 		<div class="card">
@@ -136,6 +141,8 @@ async function submitQuiz() {
 		display: flex;
 		flex-direction: column;
 		background: #f97296;
+		position: relative;
+		overflow: hidden;
 	}
 
 	.topbar {
@@ -145,6 +152,8 @@ async function submitQuiz() {
 		align-items: center;
 		padding: 0 32px;
 		box-sizing: border-box;
+		position: relative;
+		z-index: 5;
 	}
 
 	.topbar h1 {
@@ -163,6 +172,8 @@ async function submitQuiz() {
 		justify-content: center;
 		padding: 24px;
 		box-sizing: border-box;
+		position: relative;
+		z-index: 3;
 	}
 
 	.card {
@@ -173,6 +184,8 @@ async function submitQuiz() {
 		color: white;
 		box-sizing: border-box;
 		box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
+		position: relative;
+		z-index: 3;
 	}
 
 	h2 {
@@ -227,6 +240,43 @@ async function submitQuiz() {
 		opacity: 0.6;
 		cursor: not-allowed;
 	}
+    .decor {
+	position: absolute;
+	pointer-events: none;
+	object-fit: contain;
+	z-index: 2;
+    }
+
+    .sticker {
+	filter:
+		drop-shadow(2px 0 0 white)
+		drop-shadow(-2px 0 0 white)
+		drop-shadow(0 2px 0 white)
+		drop-shadow(0 -2px 0 white)
+		drop-shadow(0 6px 10px rgba(0,0,0,0.18));
+}
+
+    .tomato {
+	right: -25px;
+	top: 60px;
+	width: 30%;
+    transform: rotate(12deg);
+    }
+
+    .toast {
+	left: -90px;
+	bottom: -70px;
+	width: 50%;
+    transform: rotate(-30deg);
+    }
+
+    .cookies {
+	right: -20px;
+	bottom: -20px;
+	width: 30%;
+    position: absolute;
+	z-index: 2;
+    }
 
 	@media (max-width: 850px) {
 		.topbar {
