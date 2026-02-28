@@ -165,7 +165,7 @@
 
     .star{
         position: absolute;
-        left: -80px;
+        left: -280px;
         pointer-events: none;
         z-index: -7;
         opacity: 0.80;
