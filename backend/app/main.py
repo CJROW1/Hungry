@@ -7,7 +7,6 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
-# 1. CORS Configuration for React/Vite (Port 5173)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -16,17 +15,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 2. Path Logic for Docker/Arch Linux
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_PATH = os.path.join(BASE_DIR, "data", "deals.json")
 
-# 3. The 5-Parameter Data Model
 class QuizPreferences(BaseModel):
-    category: str       # e.g., "Sushi", "Pizza"
-    vibe: str           # e.g., "Student Staple", "Late Night"
-    max_price: float    # User's budget limit
-    min_rating: float   # Minimum quality (e.g., 4.0)
-    dietary: str        # e.g., "Vegan", "Halal", "None"
+    category: str
+    vibe: str
+    max_price: float
+    min_rating: float
+    dietary: str
 
 def load_db():
     try:
@@ -36,86 +33,65 @@ def load_db():
         print(f"Error loading JSON: {e}")
         return []
 
-# --- CORE LOGIC ---
-
-@app.get("/api/search")
-async def general_search(q: str = ""):
-    """Standard search tool for the main landing page"""
-    db = load_db()
-    if not q: return {"results": db}
-    
-    query = q.lower()
-    results = [
-        item for item in db 
-        if query in item["name"].lower() or 
-           query in item["category"].lower() or 
-           query in item.get("vibe", "").lower()
-    ]
-    return {"results": results}
-
 @app.post("/api/recommendations")
 async def get_recommendations(prefs: QuizPreferences):
-    """The 'Brain' of the Page 1 to Page 2 flow"""
     db = load_db()
     matches = []
+    
+    # Define Weights (Total = 100)
+    WEIGHTS = {
+        "category": 40,
+        "deal": 25,
+        "rating": 20,
+        "vibe": 15
+    }
 
     for item in db:
-        # Data Normalization
         price_val = float(item["price"].replace("$", ""))
         item_rating = item.get("rating", 4.0)
         promo_text = item.get("promo", "").upper()
         
-        # --- PARAMETER 1: DIETARY (Strict Filter) ---
-        if prefs.dietary.lower() != "none":
-            searchable_tags = (item["category"] + item.get("vibe", "")).lower()
-            if prefs.dietary.lower() not in searchable_tags:
-                continue # Discard if it doesn't meet dietary needs
-
-        # --- PARAMETER 2 & 3: PRICE & RATING (Strict Filters) ---
+        # --- STRICT FILTERS ---
         if price_val > prefs.max_price or item_rating < prefs.min_rating:
-            continue # Discard if too expensive or low quality
+            continue
+        if prefs.dietary.lower() != "none":
+            tags = (item["category"] + item.get("vibe", "")).lower()
+            if prefs.dietary.lower() not in tags:
+                continue
 
-        # --- SCORING ENGINE (Strength of Deal + Matching) ---
-        score = 0
+        # --- SCORING CALCULATION ---
+        current_score = 0
         
-        # Deal Strength Logic
-        if "BOGO" in promo_text:
-            score += 12  # BOGO is the king of deals
-        elif "%" in promo_text or "OFF" in promo_text:
-            score += 8   # High percentage value
-        elif "FREE" in promo_text:
-            score += 5   # Free item/side
-        elif promo_text:
-            score += 2   # Standard value pick
-
-        # Parameter 4: Category Match (Primary weight)
+        # 1. Category (40%)
         if prefs.category.lower() in item["category"].lower():
-            score += 15
-        
-        # Parameter 5: Vibe Match (Secondary weight)
-        if prefs.vibe.lower() in item.get("vibe", "").lower():
-            score += 8
+            current_score += WEIGHTS["category"]
             
-        # Quality Bonus
-        score += (item_rating * 1.5)
+        # 2. Deal Strength (25%)
+        if "BOGO" in promo_text:
+            current_score += WEIGHTS["deal"]
+        elif "%" in promo_text or "OFF" in promo_text:
+            current_score += (WEIGHTS["deal"] * 0.7)
+        elif "FREE" in promo_text:
+            current_score += (WEIGHTS["deal"] * 0.4)
+            
+        # 3. Rating Strength (20%)
+        # Normalizes the rating (e.g., a 5.0 rating gets the full 20 points)
+        rating_ratio = item_rating / 5.0
+        current_score += (WEIGHTS["rating"] * rating_ratio)
+        
+        # 4. Vibe Match (15%)
+        if prefs.vibe.lower() in item.get("vibe", "").lower():
+            current_score += WEIGHTS["vibe"]
 
-        # Store result with its calculated score
-        matches.append({**item, "match_score": round(score, 2)})
+        # Final Match Percentage (capped at 100)
+        match_percent = min(round(current_score), 100)
+        
+        matches.append({**item, "match_percentage": match_percent})
 
-    # Sort results so the 'Perfect Match' + 'Best Deal' is first
-    matches.sort(key=lambda x: x["match_score"], reverse=True)
+    # Sort by highest match percentage
+    matches.sort(key=lambda x: x["match_percentage"], reverse=True)
 
-    # Fallback: If no strict matches found, return top 4 BOGO deals generally
-    if not matches:
-        return {
-            "status": "fallback",
-            "message": "No perfect matches, but these are the strongest deals right now!",
-            "results": [i for i in db if "BOGO" in i.get("promo", "")][:4]
-        }
-
-    return {"status": "success", "results": matches}
-
-if __name__ == "__main__":
-    import uvicorn
-    # Listening on 0.0.0.0 is required for Docker access
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    return {
+        "status": "success",
+        "results": matches if matches else [i for i in db if "BOGO" in i.get("promo", "")]
+    }
