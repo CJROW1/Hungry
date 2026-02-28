@@ -25,7 +25,7 @@
 			<h2>Let’s find your perfect food match.</h2>
 			<p class="description">
 				We’ll start with a short Q&amp;A to learn your taste in food.
-				Think of it like a dating app... but for your next meal.
+				Think of it like a dating app... but for your next meal!
 			</p>
 
 			<button on:click={startQuiz}>Start Q&amp;A</button>
