@@ -18,7 +18,6 @@ except FileNotFoundError:
 
 @app.get("/api/search")
 async def search(q: str):
-<<<<<<< HEAD
     query = q.lower()
     results = [
         item for item in DEALS_DB 
@@ -26,7 +25,6 @@ async def search(q: str):
         or query in item["category"].lower() 
     ]
     return {"status": "success", "results": results}
-=======
     logger.info(f"!!! GATEWAY: Received request for {q}")
     try:
         results = await run_scraper_with_cookies(q)
@@ -38,4 +36,3 @@ async def search(q: str):
 @app.post("/greeting")
 async def greeting():
     return {"message": "Hello from Hungry Buddy Backend"}
->>>>>>> 38dc1f94d44088788a9e30cde8cd3b0e0ec8480f
